@@ -23,6 +23,7 @@ import {
   useEventDetailsReducer,
 } from 'sentry/views/issueDetails/streamline/context';
 import {EventGraph} from 'sentry/views/issueDetails/streamline/eventGraph';
+import {EventList} from 'sentry/views/issueDetails/streamline/eventList';
 import {EventNavigation} from 'sentry/views/issueDetails/streamline/eventNavigation';
 import {
   EventSearch,
@@ -69,11 +70,11 @@ export function EventDetails({
   const {detail: errorDetail} = errorStats?.responseJSON ?? {};
 
   const graphComponent = !isLoadingStats && groupStats && (
-    <GraphPadding>
+    <EventArea>
       <ErrorBoundary mini message={t('There was an error loading the event graph')}>
         <EventGraph group={group} groupStats={groupStats} searchQuery={searchQuery} />
       </ErrorBoundary>
-    </GraphPadding>
+    </EventArea>
   );
 
   return (
@@ -112,7 +113,10 @@ export function EventDetails({
       ) : (
         graphComponent
       )}
-      <GroupContent navHeight={nav?.offsetHeight}>
+      <EventArea>
+        <EventList group={group} project={project} />
+      </EventArea>
+      <EventArea>
         <FloatingEventNavigation
           event={event}
           group={group}
@@ -122,10 +126,26 @@ export function EventDetails({
         <GroupContentPadding>
           <EventDetailsContent group={group} event={event} project={project} />
         </GroupContentPadding>
-      </GroupContent>
+      </EventArea>
     </EventDetailsContext.Provider>
   );
 }
+
+const EventArea = styled('div')`
+  border: 1px solid ${p => p.theme.translucentBorder};
+  background: ${p => p.theme.background};
+  border-radius: ${p => p.theme.borderRadius};
+`;
+
+const SearchFilter = styled(EventSearch)`
+  border-radius: ${p => p.theme.borderRadius};
+`;
+
+const FilterContainer = styled('div')`
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: ${space(1)};
+`;
 
 const FloatingEventNavigation = styled(EventNavigation)`
   position: sticky;
@@ -138,34 +158,11 @@ const FloatingEventNavigation = styled(EventNavigation)`
   border-radius: 6px 6px 0 0;
 `;
 
-const SearchFilter = styled(EventSearch)`
-  border-radius: ${p => p.theme.borderRadius};
-`;
-
-const GraphPadding = styled('div')`
-  border: 1px solid ${p => p.theme.translucentBorder};
-  background: ${p => p.theme.background};
-  border-radius: ${p => p.theme.borderRadius};
-`;
-
 const GraphAlert = styled(Alert)`
   margin: 0;
   border: 1px solid ${p => p.theme.translucentBorder};
 `;
 
-const GroupContent = styled('div')<{navHeight?: number}>`
-  border: 1px solid ${p => p.theme.translucentBorder};
-  background: ${p => p.theme.background};
-  border-radius: ${p => p.theme.borderRadius};
-  position: relative;
-`;
-
 const GroupContentPadding = styled('div')`
   padding: ${space(1)} ${space(1.5)};
-`;
-
-const FilterContainer = styled('div')`
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: ${space(1)};
 `;
